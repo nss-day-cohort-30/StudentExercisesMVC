@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using StudentExercisesMVC.Models;
+using StudentExercisesMVC.Models.ViewModels;
 
 namespace StudentExercisesMVC.Controllers
 {
@@ -111,13 +112,14 @@ namespace StudentExercisesMVC.Controllers
         // GET: Students/Create
         public ActionResult Create()
         {
-            return View();
+            StudentCreateViewModel model = new StudentCreateViewModel(Connection);
+            return View(model);
         }
 
         // POST: Students/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([FromForm] Student student)
+        public ActionResult Create([FromForm] StudentCreateViewModel model)
         {
             using (SqlConnection conn = Connection)
             {
@@ -127,13 +129,12 @@ namespace StudentExercisesMVC.Controllers
                     cmd.CommandText = @"INSERT INTO Student (FirstName, LastName, SlackHandle, CohortId)         
                                          OUTPUT INSERTED.Id                                                       
                                          VALUES (@firstName, @lastName, @handle, @cId)";
-                    cmd.Parameters.Add(new SqlParameter("@firstName", student.FirstName));
-                    cmd.Parameters.Add(new SqlParameter("@lastName", student.LastName));
-                    cmd.Parameters.Add(new SqlParameter("@handle", student.SlackHandle));
-                    cmd.Parameters.Add(new SqlParameter("@cId", student.CohortId));
+                    cmd.Parameters.Add(new SqlParameter("@firstName", model.Student.FirstName));
+                    cmd.Parameters.Add(new SqlParameter("@lastName", model.Student.LastName));
+                    cmd.Parameters.Add(new SqlParameter("@handle", model.Student.SlackHandle));
+                    cmd.Parameters.Add(new SqlParameter("@cId", model.Student.CohortId));
 
                     int newId = (int)cmd.ExecuteScalar();
-                    student.Id = newId;
                     return RedirectToAction(nameof(Index));
                 }
             }
