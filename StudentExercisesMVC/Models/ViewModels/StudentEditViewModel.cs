@@ -2,8 +2,6 @@
 using StudentExercisesMVC.Repositories;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,69 +10,33 @@ namespace StudentExercisesMVC.Models.ViewModels
     public class StudentEditViewModel
     {
         // A single student
-        public Student Student { get; set; } = new Student();
+        public Student Student { get; set; }
 
         // All cohorts
-        [Display(Name="Select Cohort")]
         public List<SelectListItem> Cohorts;
 
-        public string _connectionString;
-
-        public SqlConnection Connection
-        {
-            get
-            {
-                return new SqlConnection(_connectionString);
-            }
-        }
-
-
         public StudentEditViewModel() { }
-
-        public StudentEditViewModel(int id, string connectionString)
+        public StudentEditViewModel(int id)
         {
-            _connectionString = connectionString;
-            GetAllCohorts();
-            Student = StudentRepository.GetStudent(id, connectionString);
+            Student = StudentRepository.GetStudent(id);
+            BuildCohortOptions();
         }
 
-        public void GetAllCohorts ()
+        public void BuildCohortOptions()
         {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
+            Cohorts = CohortRepository.GetCohorts()
+                .Select(li => new SelectListItem
                 {
-                    cmd.CommandText = @"SELECT c.Id, c.Name from Cohort c";
+                    Text = li.Name,
+                    Value = li.Id.ToString()
+                }).ToList();
 
-                    SqlDataReader reader = cmd.ExecuteReader();
+            Cohorts.Insert(0, new SelectListItem
+            {
+                Text = "Choose cohort...",
+                Value = "0"
+            });
 
-                    List<Cohort> cohorts = new List<Cohort>();
-
-                    while (reader.Read())
-                    {
-                        Cohort cohort = new Cohort
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Name = reader.GetString(reader.GetOrdinal("Name"))
-                        };
-
-                        cohorts.Add(cohort);
-                    }
-
-                    Cohorts = cohorts.Select(li => new SelectListItem
-                    {
-                        Text = li.Name,
-                        Value = li.Id.ToString()
-                    }).ToList();
-
-                    Cohorts.Insert(0, new SelectListItem
-                    {
-                        Text = "Choose cohort...",
-                        Value = "0"
-                    });
-                }
-            }
         }
     }
 }

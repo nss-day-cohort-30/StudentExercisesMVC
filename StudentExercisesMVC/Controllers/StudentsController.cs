@@ -14,75 +14,23 @@ namespace StudentExercisesMVC.Controllers
 {
     public class StudentsController : Controller
     {
-        private readonly IConfiguration _config;
-
-        private string _connectionString;
-
-        public StudentsController(IConfiguration config)
-        {
-            _config = config;
-            _connectionString = _config.GetConnectionString("DefaultConnection");
-        }
-
-        public SqlConnection Connection
-        {
-            get
-            {
-                return new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            }
-        }
-
         // GET: Students
         public ActionResult Index()
         {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"
-                            SELECT s.Id,
-                                s.FirstName,
-                                s.LastName,
-                                s.SlackHandle,
-                                s.CohortId
-                            FROM Student s
-                        ";
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-                    List<Student> students = new List<Student>();
-                    while (reader.Read())
-                    {
-                        Student student = new Student
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle")),
-                            CohortId = reader.GetInt32(reader.GetOrdinal("CohortId"))
-                        };
-
-                        students.Add(student);
-                    }
-
-                    reader.Close();
-
-                    return View(students);
-                }
-            }
+            return View(StudentRepository.GetStudents());
         }
 
         // GET: Students/Details/5
         public ActionResult Details(int id)
         {
-            var student = StudentRepository.GetStudent(id, _connectionString);
+            var student = StudentRepository.GetStudent(id);
             return View(student);
         }
 
         // GET: Students/Create
         public ActionResult Create()
         {
-            StudentCreateViewModel model = new StudentCreateViewModel(Connection);
+            StudentCreateViewModel model = new StudentCreateViewModel();
             return View(model);
         }
 
@@ -91,29 +39,14 @@ namespace StudentExercisesMVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([FromForm] StudentCreateViewModel model)
         {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"INSERT INTO Student (FirstName, LastName, SlackHandle, CohortId)         
-                                         OUTPUT INSERTED.Id                                                       
-                                         VALUES (@firstName, @lastName, @handle, @cId)";
-                    cmd.Parameters.Add(new SqlParameter("@firstName", model.Student.FirstName));
-                    cmd.Parameters.Add(new SqlParameter("@lastName", model.Student.LastName));
-                    cmd.Parameters.Add(new SqlParameter("@handle", model.Student.SlackHandle));
-                    cmd.Parameters.Add(new SqlParameter("@cId", model.Student.CohortId));
-
-                    int newId = (int)cmd.ExecuteScalar();
-                    return RedirectToAction(nameof(Index));
-                }
-            }
+            var student = StudentRepository.CreateStudent(model.Student);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Students/Edit/5
         public ActionResult Edit(int id)
         {
-            var model = new StudentEditViewModel(id, _connectionString);
+            var model = new StudentEditViewModel(id);
             return View(model);
         }
 
@@ -124,27 +57,9 @@ namespace StudentExercisesMVC.Controllers
         {
             try
             {
-                using (SqlConnection conn = Connection)
-                {
-                    conn.Open();
-                    using (SqlCommand cmd = conn.CreateCommand())
-                    {
-                        cmd.CommandText = @"UPDATE Student
-                                            SET FirstName = @firstName,
-                                                LastName = @lastName,
-                                                SlackHandle = @handle,
-                                                CohortId = @cId
-                                            WHERE Id = @id";
-                        cmd.Parameters.Add(new SqlParameter("@firstName", model.Student.FirstName));
-                        cmd.Parameters.Add(new SqlParameter("@lastName", model.Student.LastName));
-                        cmd.Parameters.Add(new SqlParameter("@handle", model.Student.SlackHandle));
-                        cmd.Parameters.Add(new SqlParameter("@cId", model.Student.CohortId));
-                        cmd.Parameters.Add(new SqlParameter("@id", id));
-
-                        cmd.ExecuteNonQuery();
-                        return RedirectToAction(nameof(Index));
-                    }
-                }
+                model.Student.Id = id;
+                StudentRepository.UpdateStudent(model.Student);
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception)
             {
@@ -155,7 +70,7 @@ namespace StudentExercisesMVC.Controllers
         // GET: Students/Delete/5
         public ActionResult DeleteConfirm(int id)
         {
-            var student = StudentRepository.GetStudent(id, _connectionString);
+            var student = StudentRepository.GetStudent(id);
             return View(student);
         }
 
@@ -164,23 +79,10 @@ namespace StudentExercisesMVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Delete([FromForm] int id)
         {
-            try
+            if (StudentRepository.DeleteStudent(id))
             {
-                using (SqlConnection conn = Connection)
-                {
-                    conn.Open();
-                    using (SqlCommand cmd = conn.CreateCommand())
-                    {
-                        cmd.CommandText = @"DELETE FROM Student WHERE Id = @id";
-                        cmd.Parameters.Add(new SqlParameter("@id", id));
-
-                        int rowsAffected = cmd.ExecuteNonQuery();
-                        return RedirectToAction(nameof(Index));
-                    }
-                }
-            }
-            catch
-            {
+                return RedirectToAction(nameof(Index));
+            } else {
                 return RedirectToAction(nameof(Details), new { id = id });
             }
         }
