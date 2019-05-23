@@ -25,7 +25,7 @@ namespace StudentExercisesMVC.Repositories
             }
         }
 
-        public static List<Student> GetStudents(string orderBy)
+        public static List<Student> GetStudents(string orderBy, string sortDirection)
         {
             string sql = @"
                             SELECT s.Id,
@@ -41,7 +41,7 @@ namespace StudentExercisesMVC.Repositories
 
             if (orderBy != null)
             {
-                sql += $"ORDER BY s.{orderBy}";
+                sql += $"ORDER BY s.{orderBy} {sortDirection}";
             }
 
             using (SqlConnection conn = Connection)

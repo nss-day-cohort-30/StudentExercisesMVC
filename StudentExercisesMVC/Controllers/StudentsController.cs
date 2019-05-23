@@ -5,8 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using StudentExercisesMVC.Models;
 using StudentExercisesMVC.Models.ViewModels;
 using StudentExercisesMVC.Repositories;
 
@@ -15,9 +13,29 @@ namespace StudentExercisesMVC.Controllers
     public class StudentsController : Controller
     {
         // GET: Students
-        public ActionResult Index(string _orderBy)
+        public ActionResult Index(string _orderBy, string _sortDirection)
         {
-            return View(StudentRepository.GetStudents(_orderBy));
+            string currentSort = "";
+
+            if (_sortDirection == null)
+            {
+                ViewData["sortDirection"] = "desc";
+                currentSort = "asc";
+
+            } else if (_sortDirection == "asc")
+            {
+                ViewData["sortDirection"] = "desc";
+                currentSort = "asc";
+
+            } else if (_sortDirection == "desc") {
+                ViewData["sortDirection"] = "asc";
+                currentSort = "desc";
+            }
+
+            var students = StudentRepository.GetStudents(_orderBy, currentSort);
+
+            return View(students);
+
         }
 
         // GET: Students/Details/5

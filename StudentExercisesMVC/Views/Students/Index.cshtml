@@ -13,16 +13,16 @@
     <thead>
         <tr>
             <th>
-                @Html.ActionLink(@Html.DisplayNameFor(model => model.FirstName), "Index", new { _orderBy = "FirstName" })
+                @Html.ActionLink(@Html.DisplayNameFor(model => model.FirstName), "Index", new { _orderBy = "FirstName", _sortDirection =ViewData["sortDirection"] })
             </th>
             <th>
-                @Html.ActionLink(@Html.DisplayNameFor(model => model.LastName), "Index", new { _orderBy = "LastName" })
+                @Html.ActionLink(@Html.DisplayNameFor(model => model.LastName), "Index", new { _orderBy = "LastName", _sortDirection =ViewData["sortDirection"] })
             </th>
             <th>
-                @Html.ActionLink(@Html.DisplayNameFor(model => model.SlackHandle), "Index", new { _orderBy = "SlackHandle" })
+                @Html.ActionLink(@Html.DisplayNameFor(model => model.SlackHandle), "Index", new { _orderBy = "SlackHandle", _sortDirection =ViewData["sortDirection"] })
             </th>
             <th>
-                @Html.ActionLink(@Html.DisplayNameFor(model => model.Cohort.Name), "Index", new { _orderBy = "CohortId" })
+                @Html.ActionLink(@Html.DisplayNameFor(model => model.Cohort.Name), "Index", new { _orderBy = "CohortId", _sortDirection =ViewData["sortDirection"] })
             </th>
             <th></th>
         </tr>
