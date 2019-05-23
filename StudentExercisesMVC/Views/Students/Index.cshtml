@@ -13,19 +13,22 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.FirstName)
+                @Html.ActionLink(@Html.DisplayNameFor(model => model.FirstName), "Index", new { _orderBy = "FirstName" })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.LastName)
+                @Html.ActionLink(@Html.DisplayNameFor(model => model.LastName), "Index", new { _orderBy = "LastName" })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.SlackHandle)
+                @Html.ActionLink(@Html.DisplayNameFor(model => model.SlackHandle), "Index", new { _orderBy = "SlackHandle" })
+            </th>
+            <th>
+                @Html.ActionLink(@Html.DisplayNameFor(model => model.Cohort.Name), "Index", new { _orderBy = "CohortId" })
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+    @foreach (var item in Model) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.FirstName)
@@ -37,11 +40,14 @@
                 @Html.DisplayFor(modelItem => item.SlackHandle)
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-                @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-                @Html.ActionLink("Delete", "DeleteConfirm", new { id=item.Id })
+                @Html.DisplayFor(modelItem => item.Cohort.Name)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                @Html.ActionLink("Delete", "DeleteConfirm", new { id = item.Id })
             </td>
         </tr>
-}
+    }
     </tbody>
 </table>

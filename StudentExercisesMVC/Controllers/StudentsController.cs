@@ -15,9 +15,9 @@ namespace StudentExercisesMVC.Controllers
     public class StudentsController : Controller
     {
         // GET: Students
-        public ActionResult Index()
+        public ActionResult Index(string _orderBy)
         {
-            return View(StudentRepository.GetStudents());
+            return View(StudentRepository.GetStudents(_orderBy));
         }
 
         // GET: Students/Details/5

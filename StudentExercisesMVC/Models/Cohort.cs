@@ -13,6 +13,7 @@ namespace StudentExercisesMVC.Models
 
         [Required]
         [StringLength(80)]
+        [Display(Name="Cohort")]
         public string Name { get; set; }
     }
 }

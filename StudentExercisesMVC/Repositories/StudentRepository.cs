@@ -25,21 +25,31 @@ namespace StudentExercisesMVC.Repositories
             }
         }
 
-        public static List<Student> GetStudents()
+        public static List<Student> GetStudents(string orderBy)
         {
+            string sql = @"
+                            SELECT s.Id,
+                                s.FirstName,
+                                s.LastName,
+                                s.SlackHandle,
+                                s.CohortId,
+                                c.Id CohortPk,
+                                c.Name
+                            FROM Student s 
+                            JOIN Cohort c ON s.CohortId = c.Id
+                        ";
+
+            if (orderBy != null)
+            {
+                sql += $"ORDER BY s.{orderBy}";
+            }
+
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"
-                            SELECT s.Id,
-                                s.FirstName,
-                                s.LastName,
-                                s.SlackHandle,
-                                s.CohortId
-                            FROM Student s
-                        ";
+                    cmd.CommandText = sql;
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     List<Student> students = new List<Student>();
@@ -51,7 +61,12 @@ namespace StudentExercisesMVC.Repositories
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName")),
                             SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle")),
-                            CohortId = reader.GetInt32(reader.GetOrdinal("CohortId"))
+                            CohortId = reader.GetInt32(reader.GetOrdinal("CohortId")),
+                            Cohort = new Cohort
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("CohortPk")),
+                                Name = reader.GetString(reader.GetOrdinal("Name"))
+                            }
                         };
 
                         students.Add(student);
@@ -147,8 +162,12 @@ namespace StudentExercisesMVC.Repositories
                                 s.FirstName,
                                 s.LastName,
                                 s.SlackHandle,
-                                s.CohortId
-                            FROM Student s WHERE s.Id = @StudentId
+                                s.CohortId,
+                                c.Id CohortPk,
+                                c.Name
+                            FROM Student s 
+                            JOIN Cohort c ON s.CohortId = c.Id
+                            WHERE s.Id = @StudentId
                         ";
                     cmd.Parameters.Add(new SqlParameter("@StudentId", id));
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -161,7 +180,12 @@ namespace StudentExercisesMVC.Repositories
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName")),
                             SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle")),
-                            CohortId = reader.GetInt32(reader.GetOrdinal("CohortId"))
+                            CohortId = reader.GetInt32(reader.GetOrdinal("CohortId")),
+                            Cohort = new Cohort
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("CohortPk")),
+                                Name = reader.GetString(reader.GetOrdinal("Name"))
+                            }
                         };
                     }
 
