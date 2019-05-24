@@ -34,10 +34,11 @@ button.accept-policy {
   line-height: inherit;
 }
 
-.multiselect {
+select.form-control[size], select.form-control[multiple] {
     width: 25em;
     height: 12em;
 }
+
 
 /* Sticky footer styles
 -------------------------------------------------- */
