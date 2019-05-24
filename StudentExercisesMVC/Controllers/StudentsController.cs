@@ -77,12 +77,25 @@ namespace StudentExercisesMVC.Controllers
         {
             try
             {
+                // Update the student record in the database
                 model.Student.Id = id;
                 StudentRepository.UpdateStudent(model.Student);
+
+                // Clear out all assigned exercises
+                ExerciseRepository.ClearAssignedExercises(model.Student.Id);
+
+                // Assign exercises selected in the form
+                if (model.SelectedExercises.Count > 0)
+                {
+                    model.SelectedExercises.ForEach(i =>
+                        ExerciseRepository.AssignToStudent(i, model.Student.Id));
+                }
+
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 return View(model);
             }
         }

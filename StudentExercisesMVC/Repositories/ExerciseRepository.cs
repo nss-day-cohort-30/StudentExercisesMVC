@@ -101,6 +101,47 @@ namespace StudentExercisesMVC.Repositories
             }
         }
 
+        public static void AssignToStudent(int exerciseId, int studentId)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"INSERT INTO StudentExercise (InstructorId, StudentId, ExerciseId)         
+                                         VALUES (1, @student, @exercise)";
+                    cmd.Parameters.Add(new SqlParameter("@student", studentId));
+                    cmd.Parameters.Add(new SqlParameter("@exercise", exerciseId));
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static bool ClearAssignedExercises(int id)
+        {
+            try
+            {
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"DELETE FROM StudentExercise WHERE StudentId = @id";
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected == 0) return false;
+                        return true;
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public static void UpdateExercise (Exercise exercise)
         {
             using (SqlConnection conn = Connection)
