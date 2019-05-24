@@ -164,29 +164,47 @@ namespace StudentExercisesMVC.Repositories
                                 s.SlackHandle,
                                 s.CohortId,
                                 c.Id CohortPk,
-                                c.Name
+                                c.Name,
+                                e.Id ExerciseId,
+                                e.Name ExerciseName,
+                                e.[Language]
                             FROM Student s 
                             JOIN Cohort c ON s.CohortId = c.Id
+                            LEFT JOIN StudentExercise se ON se.StudentId = s.Id
+                            LEFT JOIN Exercise e ON e.Id = se.ExerciseId
                             WHERE s.Id = @StudentId
                         ";
                     cmd.Parameters.Add(new SqlParameter("@StudentId", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    if (reader.Read())
+                    while (reader.Read())
                     {
-                        student = new Student
+                        if (student == null)
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle")),
-                            CohortId = reader.GetInt32(reader.GetOrdinal("CohortId")),
-                            Cohort = new Cohort
+                            student = new Student
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("CohortPk")),
-                                Name = reader.GetString(reader.GetOrdinal("Name"))
-                            }
-                        };
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle")),
+                                CohortId = reader.GetInt32(reader.GetOrdinal("CohortId")),
+                                Cohort = new Cohort
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("CohortPk")),
+                                    Name = reader.GetString(reader.GetOrdinal("Name"))
+                                }
+                            };
+                        }
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("ExerciseId")))
+                        {
+                            student.AssignedExercises.Add(new Exercise
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("ExerciseId")),
+                                Name = reader.GetString(reader.GetOrdinal("ExerciseName")),
+                                Language = reader.GetString(reader.GetOrdinal("Language"))
+                            });
+                        }
                     }
 
                     reader.Close();

@@ -51,6 +51,7 @@ namespace StudentExercisesMVC
 
             StudentRepository.SetConfig(Configuration);
             CohortRepository.SetConfig(Configuration);
+            ExerciseRepository.SetConfig(Configuration);
 
             app.UseStaticFiles();
             app.UseCookiePolicy();

@@ -17,13 +17,17 @@ namespace StudentExercisesMVC.Controllers
         {
             string currentSort = "";
 
-            if (_sortDirection == null)
+            if (_sortDirection == null && _orderBy != null)
             {
                 ViewData["sortDirection"] = "desc";
                 currentSort = "asc";
 
-            } else if (_sortDirection == "asc")
-            {
+            } else if (_sortDirection == null && _orderBy == null) {
+                _orderBy = "CohortId";
+                currentSort = "asc";
+                ViewData["sortDirection"] = "";
+
+            } else if (_sortDirection == "asc") {
                 ViewData["sortDirection"] = "desc";
                 currentSort = "asc";
 
@@ -33,9 +37,7 @@ namespace StudentExercisesMVC.Controllers
             }
 
             var students = StudentRepository.GetStudents(_orderBy, currentSort);
-
             return View(students);
-
         }
 
         // GET: Students/Details/5
